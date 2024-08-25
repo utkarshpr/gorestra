@@ -4,6 +4,7 @@ package repository
 import (
 	"database/sql"
 	"errors"
+	"my-restaurant-app/internal/auth"
 	"my-restaurant-app/internal/models"
 
 	"github.com/go-sql-driver/mysql"
@@ -45,4 +46,30 @@ func isUniqueConstraintViolation(err error) bool {
 		}
 	}
 	return false // Replace with actual implementation
+}
+
+func (r *UserRepository) LoginUser(user *models.LoginRequest) (*models.UserResponse, error) {
+
+	userFetched := &models.User{}
+	query := "SELECT user_id, username, email, password, role FROM users WHERE email = ?"
+	row := r.db.QueryRow(query, user.Email)
+
+	err := row.Scan(&userFetched.ID, &userFetched.Username, &userFetched.Email, &userFetched.Password, &userFetched.Role)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, errors.New("user not found")
+		}
+		return nil, err
+	}
+	err = auth.CompareHashAndPassword(userFetched.Password, user.Password)
+	if err != nil {
+		return nil, errors.New("invalid credentials") // Password does not match
+	}
+	userResponse := models.UserResponse{
+		ID:       userFetched.ID,
+		Username: userFetched.Username,
+		Email:    userFetched.Email,
+		Role:     userFetched.Role,
+	}
+	return &userResponse, nil
 }

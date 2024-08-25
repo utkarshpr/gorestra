@@ -23,6 +23,7 @@ func main() {
 
 	// Initialize the HTTP server
 	http.HandleFunc("/api/users/register", userHandler.RegisterUserHandler)
+	http.HandleFunc("/api/users/login", userHandler.LoginUserHandler)
 
 	// Start the server
 	log.Println("Server started at http://localhost:8081")

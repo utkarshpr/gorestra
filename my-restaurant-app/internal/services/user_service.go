@@ -2,7 +2,6 @@ package services
 
 import (
 	"errors"
-	"fmt"
 
 	"my-restaurant-app/internal/auth"
 	"my-restaurant-app/internal/models"
@@ -21,7 +20,7 @@ func NewUserService(userRepo *repository.UserRepository) *UserService {
 
 // RegisterUser handles the user registration logic.
 func (s *UserService) RegisterUser(user *models.User) error {
-	fmt.Print(user)
+
 	if user.Username == "" || user.Email == "" || user.Password == "" {
 		return errors.New("missing required fields")
 	}
@@ -35,4 +34,19 @@ func (s *UserService) RegisterUser(user *models.User) error {
 
 	// Save the user
 	return s.userRepo.CreateUser(user)
+}
+
+func (s *UserService) LoginUser(user *models.LoginRequest) (*models.UserResponse, error) {
+
+	if user.Email == "" || user.Password == "" {
+		return nil, errors.New("missing required fields")
+	}
+
+	// fetch the user
+	userFetched, err := s.userRepo.LoginUser(user)
+	if err != nil {
+		return nil, err
+	}
+
+	return userFetched, nil
 }

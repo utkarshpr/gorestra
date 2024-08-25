@@ -17,6 +17,12 @@ type UserResponse struct {
 }
 
 type GenericResponse struct {
-	Message map[string]string `json:"message"`
+	Message map[string]string `json:"text"`
 	Data    interface{}       `json:"data,omitempty"` // Data can be any type
+}
+
+// LoginRequest represents the login request payload
+type LoginRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }

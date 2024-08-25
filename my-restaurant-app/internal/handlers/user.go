@@ -13,10 +13,10 @@ type UserHandler struct {
 	userService *services.UserService
 }
 
-type UserRegisterResponse struct {
-	message      map[string]string
-	userResponse models.UserResponse
-}
+// type UserRegisterResponse struct {
+// 	message      map[string]string
+// 	userResponse models.UserResponse
+// }
 
 // NewUserHandler creates a new UserHandler.
 func NewUserHandler(userService *services.UserService) *UserHandler {
@@ -38,7 +38,9 @@ func (h *UserHandler) RegisterUserHandler(w http.ResponseWriter, r *http.Request
 	}
 
 	if err := h.userService.RegisterUser(&user); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+
+		models.ManageResponse(w, err.Error(), http.StatusBadRequest, nil)
+
 		return
 	}
 	userResponse := models.UserResponse{
@@ -48,17 +50,33 @@ func (h *UserHandler) RegisterUserHandler(w http.ResponseWriter, r *http.Request
 		Role:     user.Role,
 	}
 
-	response := models.GenericResponse{
-		Message: map[string]string{"message": "User registered successfully"},
-		Data:    userResponse,
-	}
-	beautifiedJSON, err := json.MarshalIndent(response, "", "  ")
-	if err != nil {
-		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+	models.ManageResponse(w, "User registered successfully", http.StatusCreated, &userResponse)
+}
+
+func (h *UserHandler) LoginUserHandler(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method != http.MethodPost {
+		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
 		return
 	}
-	// Set response headers
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	w.Write(beautifiedJSON)
+
+	var login models.LoginRequest
+
+	decoder := json.NewDecoder(r.Body)
+	// Make decoder strict
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&login); err != nil {
+
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		return
+	}
+	user, err := h.userService.LoginUser(&login)
+	if err != nil {
+
+		models.ManageResponse(w, err.Error(), http.StatusBadRequest, nil)
+		return
+	}
+
+	models.ManageResponse(w, "User Logged in successfully", http.StatusCreated, user)
+
 }

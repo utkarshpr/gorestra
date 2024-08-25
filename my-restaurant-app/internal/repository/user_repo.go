@@ -73,3 +73,17 @@ func (r *UserRepository) LoginUser(user *models.LoginRequest) (*models.UserRespo
 	}
 	return &userResponse, nil
 }
+
+func (r *UserRepository) GetUser(username string) (*models.User, error) {
+	query := "SELECT user_id,username,email,role FROM users WHERE email = ?"
+	row := r.db.QueryRow(query, username)
+
+	var user models.User
+	if err := row.Scan(&user.ID, &user.Username, &user.Email, &user.Role); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, errors.New("user not found")
+		}
+		return nil, err
+	}
+	return &user, nil
+}

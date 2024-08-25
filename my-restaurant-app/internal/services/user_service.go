@@ -50,3 +50,12 @@ func (s *UserService) LoginUser(user *models.LoginRequest) (*models.UserResponse
 
 	return userFetched, nil
 }
+
+// GetUserProfile retrieves a user profile by username
+func (s *UserService) GetUserProfile(username string) (*models.User, error) {
+	user, err := s.userRepo.GetUser(username)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}

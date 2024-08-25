@@ -12,6 +12,7 @@ import (
 )
 
 func main() {
+	jwtSecret := []byte("your_secret_key")
 	db, err := database.ConnectDB()
 	if err != nil {
 		log.Fatalf("Error connecting to the database: %v", err)
@@ -19,11 +20,12 @@ func main() {
 	defer db.Close()
 	userRepo := repository.NewUserRepository(db)
 	userService := services.NewUserService(userRepo)
-	userHandler := handlers.NewUserHandler(userService)
+	userHandler := handlers.NewUserHandler(userService, jwtSecret)
 
 	// Initialize the HTTP server
 	http.HandleFunc("/api/users/register", userHandler.RegisterUserHandler)
 	http.HandleFunc("/api/users/login", userHandler.LoginUserHandler)
+	http.HandleFunc("/api/users/profile", userHandler.GetUserProfileHandler)
 
 	// Start the server
 	log.Println("Server started at http://localhost:8081")

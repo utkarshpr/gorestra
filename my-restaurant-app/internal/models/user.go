@@ -26,3 +26,9 @@ type LoginRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
+
+type GenericResponseLogin struct {
+	Message map[string]string `json:"text"`
+	Data    interface{}       `json:"data,omitempty"`
+	Token   string            `json:"token"`
+}

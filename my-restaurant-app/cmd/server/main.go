@@ -4,23 +4,27 @@ package main
 import (
 	"log"
 
+	"my-restaurant-app/internal/database"
 	"my-restaurant-app/internal/handlers"
+	"my-restaurant-app/internal/repository"
+	"my-restaurant-app/internal/services"
 	"net/http"
 )
 
 func main() {
+	db, err := database.ConnectDB()
+	if err != nil {
+		log.Fatalf("Error connecting to the database: %v", err)
+	}
+	defer db.Close()
+	userRepo := repository.NewUserRepository(db)
+	userService := services.NewUserService(userRepo)
+	userHandler := handlers.NewUserHandler(userService)
 
 	// Initialize the HTTP server
-	http.HandleFunc("/api/users/register", handlers.RegisterUser)
-	//http.HandleFunc("/api/users/login", handlers.LoginUser)
-
-	// Protected routes (middleware for authentication)
-	// http.HandleFunc("/api/users/profile", middleware.AuthMiddleware(handlers.GetUserProfile))
-	// http.HandleFunc("/api/users/profile/update", middleware.AuthMiddleware(handlers.UpdateUserProfile))
-
-	// You can add more routes here for menus, orders, etc.
+	http.HandleFunc("/api/users/register", userHandler.RegisterUserHandler)
 
 	// Start the server
-	log.Println("Server started at http://localhost:8080")
+	log.Println("Server started at http://localhost:8081")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

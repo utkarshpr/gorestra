@@ -87,7 +87,7 @@ func (h *UserHandler) LoginUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Generate JWT token
-	tokenString, err := h.generateJWTToken(user.Email)
+	tokenString, err := h.generateJWTTokens(user.Email, user.Role)
 	if err != nil {
 		http.Error(w, "Failed to generate token", http.StatusInternalServerError)
 		return
@@ -162,6 +162,7 @@ func (h *UserHandler) GetUserProfileHandler(w http.ResponseWriter, r *http.Reque
 }
 
 // Helper function to generate JWT token
+/*
 func (h *UserHandler) generateJWTToken(username string) (string, error) {
 	// Define token expiration time
 	expirationTime := time.Now().Add(24 * time.Hour)
@@ -170,6 +171,33 @@ func (h *UserHandler) generateJWTToken(username string) (string, error) {
 	claims := jwt.RegisteredClaims{
 		Subject:   username,
 		ExpiresAt: jwt.NewNumericDate(expirationTime),
+	}
+
+	// Create a new token object, specifying signing method and the claims
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	// Sign the token with the secret key
+	tokenString, err := token.SignedString(h.jwtSecret)
+	if err != nil {
+		return "", err
+	}
+
+	return tokenString, nil
+}*/
+
+func (h *UserHandler) generateJWTTokens(email, role string) (string, error) {
+	// Define token expiration time
+	expirationTime := time.Now().Add(24 * time.Hour)
+
+	// Create the custom claims
+	claims := &models.CustomClaims{
+		Email: email,
+		Role:  role,
+		// FullName: fullName,
+		RegisteredClaims: jwt.RegisteredClaims{
+			Subject:   email,
+			ExpiresAt: jwt.NewNumericDate(expirationTime),
+		},
 	}
 
 	// Create a new token object, specifying signing method and the claims

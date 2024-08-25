@@ -1,6 +1,8 @@
 // internal/models/user.go
 package models
 
+import "github.com/golang-jwt/jwt/v5"
+
 // User represents a user in the system.
 type User struct {
 	ID       int    `json:"userid"`   // Unique identifier for the user
@@ -31,4 +33,13 @@ type GenericResponseLogin struct {
 	Message map[string]string `json:"text"`
 	Data    interface{}       `json:"data,omitempty"`
 	Token   string            `json:"token"`
+}
+
+// CustomClaims defines the structure for the JWT claims including custom fields
+type CustomClaims struct {
+	Email string `json:"email"`
+	Role  string `json:"role"`
+	//FullName string `json:"full_name"`
+	// Embed the standard claims
+	jwt.RegisteredClaims
 }

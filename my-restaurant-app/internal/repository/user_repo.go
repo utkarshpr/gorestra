@@ -87,3 +87,27 @@ func (r *UserRepository) GetUser(username string) (*models.User, error) {
 	}
 	return &user, nil
 }
+
+func (r *UserRepository) UpdateUserPofile(updateProfile *models.UpdateProfile) (*models.UserResponse, error) {
+
+	query := "Update users set username= ?,password =? where email =?"
+	hashPassword, err := auth.HashPassword(updateProfile.Password)
+	if err != nil {
+		return nil, err
+	}
+	row := r.db.QueryRow(query, updateProfile.Username, hashPassword, updateProfile.Email)
+	if err := row.Err(); err != nil {
+		return nil, err
+	}
+	query = "SELECT user_id,username,email,role FROM users WHERE email = ?"
+	row = r.db.QueryRow(query, updateProfile.Email)
+
+	var userResponse models.UserResponse
+	if err := row.Scan(&userResponse.ID, &userResponse.Username, &userResponse.Email, &userResponse.Role); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, errors.New("user not found")
+		}
+		return nil, err
+	}
+	return &userResponse, nil
+}

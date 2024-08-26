@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"fmt"
 
 	"my-restaurant-app/internal/auth"
 	"my-restaurant-app/internal/models"
@@ -58,4 +59,15 @@ func (s *UserService) GetUserProfile(username string) (*models.User, error) {
 		return nil, err
 	}
 	return user, nil
+}
+
+func (s *UserService) UpdateUserProfile(updateProfile *models.UpdateProfile) (*models.UserResponse, error) {
+
+	fmt.Println(updateProfile.Email + " " + updateProfile.Password + " " + updateProfile.Username)
+	user, err := s.userRepo.UpdateUserPofile(updateProfile)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+
 }

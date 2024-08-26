@@ -43,3 +43,11 @@ type CustomClaims struct {
 	// Embed the standard claims
 	jwt.RegisteredClaims
 }
+
+type UpdateProfile struct {
+	//ID       int    `json:"userid"`   // Unique identifier for the user
+	Username string `json:"username"` // User's username
+	Email    string `json:"email"`    // User's email address
+	Password string `json:"password"` // User's password (hashed), not included in JSON responses
+	//Role     string `json:"role"`     // User's role (e.g., "customer", "admin")
+}

@@ -26,8 +26,11 @@ func main() {
 	http.HandleFunc("/api/users/register", userHandler.RegisterUserHandler)
 	http.HandleFunc("/api/users/login", userHandler.LoginUserHandler)
 	http.HandleFunc("/api/users/profile", userHandler.UserProfileHandler)
-	//http.HandleFunc("/api/users/profile", userHandler.UpdateUserProfileHandler)
 
+	menuRepo := repository.NewMenuRepository(db)
+	menuService := services.NewMenuService(menuRepo)
+	menuHandler := handlers.NewMenuHandler(menuService, jwtSecret, userService)
+	http.HandleFunc("/api/menu", menuHandler.CreateMenu)
 	// Start the server
 	log.Println("Server started at http://localhost:8081")
 	log.Fatal(http.ListenAndServe(":8080", nil))

@@ -8,3 +8,6 @@ type Menu struct {
 	Category    string  `json:"category"`
 	Image       string  `json:"image"`
 }
+type FetchAllMenu struct {
+	Menu []Menu
+}

@@ -28,3 +28,13 @@ func (s *MenuService) CreateMenu(menu *models.Menu) (*models.Menu, error) {
 	menu, err := s.menuRepo.CreateMenu(menu)
 	return menu, err
 }
+
+func (s *MenuService) FetchAllMenu() ([]models.Menu, error) {
+	menu, err := s.menuRepo.FetchAllMenu()
+	return menu, err
+}
+
+func (s *MenuService) FetchMenu(id string) (*models.Menu, error) {
+	menu, err := s.menuRepo.FetchMenu(id)
+	return menu, err
+}

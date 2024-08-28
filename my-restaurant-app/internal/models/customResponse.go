@@ -54,3 +54,19 @@ func ManageResponseMenu(w http.ResponseWriter, errString string, code int, u *Me
 	w.WriteHeader(code)
 	w.Write(beautifiedJSON)
 }
+
+func ManageResponseMenus(w http.ResponseWriter, errString string, code int, u []Menu) {
+	response := GenericResponse{
+		Message: map[string]string{"message": errString},
+		Data:    u,
+	}
+	beautifiedJSON, err := json.MarshalIndent(response, "", "  ")
+	if err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
+	// Set response headers
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	w.Write(beautifiedJSON)
+}

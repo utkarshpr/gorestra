@@ -30,7 +30,11 @@ func main() {
 	menuRepo := repository.NewMenuRepository(db)
 	menuService := services.NewMenuService(menuRepo)
 	menuHandler := handlers.NewMenuHandler(menuService, jwtSecret, userService)
+
 	http.HandleFunc("/api/menu", menuHandler.CreateMenu)
+	http.HandleFunc("/api/menu/fetchAllMenu", menuHandler.FetchAllMenu)
+	http.HandleFunc("/api/menu/fetchMenu", menuHandler.FetchMenu)
+
 	// Start the server
 	log.Println("Server started at http://localhost:8081")
 	log.Fatal(http.ListenAndServe(":8080", nil))

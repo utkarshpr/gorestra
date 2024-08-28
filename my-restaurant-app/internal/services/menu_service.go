@@ -38,3 +38,13 @@ func (s *MenuService) FetchMenu(id string) (*models.Menu, error) {
 	menu, err := s.menuRepo.FetchMenu(id)
 	return menu, err
 }
+
+func (s *MenuService) UpdateMenu(menu *models.Menu) (*models.Menu, error) {
+	menu, err := s.menuRepo.UpdateMenu(menu)
+	return menu, err
+}
+
+func (s *MenuService) DeleteMenu(id string) (bool, error) {
+	done, err := s.menuRepo.DeleteMenu(id)
+	return done, err
+}

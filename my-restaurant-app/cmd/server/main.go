@@ -34,6 +34,8 @@ func main() {
 	http.HandleFunc("/api/menu", menuHandler.CreateMenu)
 	http.HandleFunc("/api/menu/fetchAllMenu", menuHandler.FetchAllMenu)
 	http.HandleFunc("/api/menu/fetchMenu", menuHandler.FetchMenu)
+	http.HandleFunc("/api/menu/updateMenu", menuHandler.UpdateMenu)
+	http.HandleFunc("/api/menu/deleteMenu", menuHandler.DeleteMenu)
 
 	// Start the server
 	log.Println("Server started at http://localhost:8081")

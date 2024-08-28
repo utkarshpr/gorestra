@@ -160,6 +160,119 @@ func (h *MenuHandler) FetchMenu(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func (h *MenuHandler) UpdateMenu(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method != http.MethodPut {
+		models.ManageResponseMenu(w, "Invalid request Method ", http.StatusBadRequest, nil)
+		return
+	}
+
+	var menu *models.Menu
+
+	role := h.Authorization(w, r)
+
+	if role == "admin" {
+		r.ParseMultipartForm(10 << 20) // 10 MB file size limit
+
+		// Get file handler
+		file, handler, err := r.FormFile("image")
+		if err != nil {
+			http.Error(w, "Error retrieving the file"+err.Error(), http.StatusBadRequest)
+			return
+		}
+		defer file.Close()
+		// Create the project-specific directory if it doesn't exist
+		projectDir := "uploads"
+		if _, err := os.Stat(projectDir); os.IsNotExist(err) {
+			err := os.MkdirAll(projectDir, os.ModePerm)
+			if err != nil {
+				http.Error(w, "Unable to create directory on server", http.StatusInternalServerError)
+				return
+			}
+		}
+
+		// Create file on server in the project-specific directory
+		filePath := filepath.Join(projectDir, handler.Filename)
+		dst, err := os.Create(filePath)
+		if err != nil {
+			http.Error(w, "Unable to create the file on server", http.StatusInternalServerError)
+			return
+		}
+		defer dst.Close()
+
+		// Copy the uploaded file to the server's file system
+		if _, err := io.Copy(dst, file); err != nil {
+			http.Error(w, "Unable to save the file", http.StatusInternalServerError)
+			return
+		}
+
+		// Parse other form fields
+		menuid := r.FormValue("menuid")
+		name := r.FormValue("name")
+		description := r.FormValue("description")
+		price, err := strconv.ParseFloat(r.FormValue("price"), 64)
+		if err != nil {
+			models.ManageResponseMenu(w, "Price conversion"+err.Error(), http.StatusBadRequest, nil)
+		}
+		category := r.FormValue("category")
+
+		menu = &models.Menu{
+			ID:          menuid,
+			Name:        name,
+			Description: description,
+			Price:       price,
+			Category:    category,
+			Image:       filePath, // Store the file path in the database
+		}
+
+		menu, err = h.menuService.UpdateMenu(menu)
+		if err != nil {
+			models.ManageResponseMenu(w, err.Error(), http.StatusBadRequest, nil)
+			return
+		}
+		if menu == nil {
+			models.ManageResponseMenu(w, "Failed to Update the menu as id donot exists", http.StatusBadRequest, nil)
+			return
+		}
+
+		models.ManageResponseMenu(w, "Menu Updated in successfully", http.StatusCreated, menu)
+	} else {
+		models.ManageResponseMenu(w, "Updtae can only be perform by Admin", http.StatusUnauthorized, nil)
+	}
+
+}
+
+func (h *MenuHandler) DeleteMenu(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodDelete {
+		models.ManageResponseMenu(w, "Invalid Request Method", http.StatusMethodNotAllowed, nil)
+		return
+	}
+
+	role := h.Authorization(w, r)
+	if role == "admin" {
+		idStr := r.URL.Query().Get("id")
+		if idStr == "" {
+			models.ManageResponseMenu(w, "ID is required", http.StatusBadRequest, nil)
+			return
+		}
+
+		done, err := h.menuService.DeleteMenu(idStr)
+		if err != nil {
+			models.ManageResponseMenu(w, "Failed to delete the menu "+err.Error(), http.StatusBadRequest, nil)
+			return
+		}
+
+		if !done {
+			models.ManageResponseMenu(w, "Failed to delete the menu as id donot exists", http.StatusBadRequest, nil)
+			return
+		}
+		models.ManageResponseMenu(w, " Menu deleted successfully ", http.StatusOK, nil)
+	} else {
+		models.ManageResponseMenu(w, "Deletion can only be perform by Admin", http.StatusUnauthorized, nil)
+	}
+
+}
+
 func (h *MenuHandler) Authorization(w http.ResponseWriter, r *http.Request) string {
 	authHeader := r.Header.Get("Authorization")
 

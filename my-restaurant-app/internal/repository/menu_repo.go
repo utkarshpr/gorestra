@@ -3,7 +3,7 @@ package repository
 import (
 	"database/sql"
 	"errors"
-	"fmt"
+
 	"my-restaurant-app/internal/models"
 )
 
@@ -48,7 +48,6 @@ func (r *MenuRepository) FetchAllMenu() ([]models.Menu, error) {
 		}
 		menuItems = append(menuItems, menuItem)
 	}
-	fmt.Println(menuItems)
 
 	if err = rows.Err(); err != nil {
 		return nil, err
@@ -71,4 +70,45 @@ func (r *MenuRepository) FetchMenu(id string) (*models.Menu, error) {
 	}
 
 	return &menuItem, nil
+}
+
+func (r *MenuRepository) UpdateMenu(menu *models.Menu) (*models.Menu, error) {
+	query := "update menu_items set name=?, description=?, price=?, category=?, image=?  where id=?"
+	row := r.db.QueryRow(query, menu.Name, menu.Description, menu.Price, menu.Category, menu.Image, menu.ID)
+	if err := row.Err(); err != nil {
+		return nil, err
+	}
+	query = "SELECT id, name, description, price, category, image FROM menu_items where id=?"
+	row = r.db.QueryRow(query, menu.ID)
+
+	var menuItem models.Menu
+	err := row.Scan(&menuItem.ID, &menuItem.Name, &menuItem.Description, &menuItem.Price, &menuItem.Category, &menuItem.Image)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil // No result found
+		}
+		return nil, err
+	}
+
+	return &menuItem, nil
+}
+
+func (r *MenuRepository) DeleteMenu(id string) (bool, error) {
+
+	query := "Delete from  menu_items where id=?"
+	result, err := r.db.Exec(query, id)
+	if err != nil {
+		return false, err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return false, err
+	}
+
+	if rowsAffected == 0 {
+		return false, errors.New("no rows were deleted")
+	}
+
+	return true, nil
 }

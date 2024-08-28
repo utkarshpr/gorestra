@@ -237,7 +237,7 @@ func (h *MenuHandler) UpdateMenu(w http.ResponseWriter, r *http.Request) {
 
 		models.ManageResponseMenu(w, "Menu Updated in successfully", http.StatusCreated, menu)
 	} else {
-		models.ManageResponseMenu(w, "Updtae can only be perform by Admin", http.StatusUnauthorized, nil)
+		models.ManageResponseMenu(w, "Update can only be perform by Admin", http.StatusUnauthorized, nil)
 	}
 
 }

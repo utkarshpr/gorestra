@@ -37,6 +37,12 @@ func main() {
 	http.HandleFunc("/api/menu/updateMenu", menuHandler.UpdateMenu)
 	http.HandleFunc("/api/menu/deleteMenu", menuHandler.DeleteMenu)
 
+	orderRepo := repository.NewOrderRepository(db)
+	orderService := services.NewOrderService(orderRepo)
+	orderHandler := handlers.NewOrderHandler(orderService)
+
+	http.HandleFunc("/api/orders", orderHandler.CreateOrder)
+
 	// Start the server
 	log.Println("Server started at http://localhost:8081")
 	log.Fatal(http.ListenAndServe(":8080", nil))

@@ -39,10 +39,11 @@ func main() {
 
 	orderRepo := repository.NewOrderRepository(db)
 	orderService := services.NewOrderService(orderRepo)
-	orderHandler := handlers.NewOrderHandler(orderService)
+	orderHandler := handlers.NewOrderHandler(orderService, jwtSecret, userService)
 
 	http.HandleFunc("/api/orders", orderHandler.CreateOrder)
-
+	http.HandleFunc("/api/ordersAll", orderHandler.FetchAllOrder)
+	http.HandleFunc("/api/orderByUser", orderHandler.GetOrdersByUserID)
 	// Start the server
 	log.Println("Server started at http://localhost:8081")
 	log.Fatal(http.ListenAndServe(":8080", nil))

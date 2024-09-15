@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"fmt"
 	"my-restaurant-app/internal/models"
 	"strconv"
 )
@@ -73,4 +74,120 @@ func (r *OrderRepository) CreateOrder(order *models.Order) (*models.OrderRespons
 	}
 
 	return orderResponse, nil
+}
+
+func (r *OrderRepository) GetAllOrders() ([]*models.OrderResponse, error) {
+	query := `SELECT o.id, o.user_id, o.total_price, o.status, 
+				oi.menu_item_id, oi.quantity, oi.price, mi.name 
+			  FROM orders o
+			  JOIN order_items oi ON o.id = oi.order_id
+			  JOIN menu_items mi ON oi.menu_item_id = mi.id`
+
+	// Execute the query
+	rows, err := r.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	// Map to hold orders by their ID (since one order can have multiple items)
+	orderMap := make(map[string]*models.OrderResponse)
+
+	// Iterate over the result rows
+	for rows.Next() {
+		var orderID, userID, menuItemID, menuItemName, status string
+		var totalPrice float64
+		var quantity int
+		var itemPrice float64
+
+		// Scan the data into the respective variables
+		err := rows.Scan(&orderID, &userID, &totalPrice, &status, &menuItemID, &quantity, &itemPrice, &menuItemName)
+		if err != nil {
+			return nil, err
+		}
+
+		// If the order doesn't exist in the map yet, create it
+		if _, exists := orderMap[orderID]; !exists {
+			orderMap[orderID] = &models.OrderResponse{
+				ID:         orderID,
+				UserId:     userID,
+				TotalPrice: fmt.Sprintf("%.2f", totalPrice),
+				Status:     status,
+				Orders:     []models.Orders{},
+			}
+		}
+
+		// Add the item to the order
+		orderMap[orderID].Orders = append(orderMap[orderID].Orders, models.Orders{
+			MenuItemID: menuItemID,
+			Quantity:   quantity,
+			Price:      fmt.Sprintf("%.2f", itemPrice),
+			MenuItem:   menuItemName,
+		})
+	}
+
+	// Convert the map to a slice of orders
+	var orders []*models.OrderResponse
+	for _, order := range orderMap {
+		orders = append(orders, order)
+	}
+
+	return orders, nil
+}
+
+func (r *OrderRepository) GetAllOrdersByUser(userID int) ([]*models.OrderResponse, error) {
+	query := `
+	SELECT o.id AS order_id, o.user_id, o.total_price, o.status, 
+	       oi.menu_item_id, oi.quantity, oi.price, mi.name 
+	FROM orders o 
+	JOIN order_items oi ON o.id = oi.order_id 
+	JOIN menu_items mi ON oi.menu_item_id = mi.id 
+	WHERE o.user_id = ?
+	`
+	rows, err := r.db.Query(query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	orderMap := make(map[string]*models.OrderResponse)
+	var orderList []*models.OrderResponse
+
+	for rows.Next() {
+		var orderID, menuItemID, menuItemName, status string
+		var totalPrice string
+		var quantity int
+		var price string
+
+		err = rows.Scan(&orderID, &userID, &totalPrice, &status, &menuItemID, &quantity, &price, &menuItemName)
+		if err != nil {
+			return nil, err
+		}
+
+		// Check if the order already exists in the map
+		if _, exists := orderMap[orderID]; !exists {
+			// If not, create a new order response
+			orderMap[orderID] = &models.OrderResponse{
+				ID:         orderID,
+				UserId:     strconv.Itoa(userID),
+				TotalPrice: totalPrice,
+				Status:     status,
+				Orders:     []models.Orders{},
+			}
+			orderList = append(orderList, orderMap[orderID])
+		}
+
+		// Create an order item
+		orderItem := models.Orders{
+			MenuItemID: menuItemID,
+			Quantity:   quantity,
+			Price:      price,
+			MenuItem:   menuItemName,
+		}
+
+		// Append the item to the order
+		orderMap[orderID].Orders = append(orderMap[orderID].Orders, orderItem)
+	}
+
+	return orderList, nil
 }

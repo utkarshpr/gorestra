@@ -22,3 +22,16 @@ func (s *OrderService) CreateOrder(order *models.Order) (*models.OrderResponse, 
 	}
 	return orderResponse, nil
 }
+
+func (s *OrderService) GetAllOrders() ([]*models.OrderResponse, error) {
+	allorders, err := s.orderRepo.GetAllOrders()
+	return allorders, err
+}
+
+func (s *OrderService) GetOrdersByUserID(userID int) ([]*models.OrderResponse, error) {
+	orders, err := s.orderRepo.GetAllOrdersByUser(userID)
+	if err != nil {
+		return nil, err
+	}
+	return orders, nil
+}

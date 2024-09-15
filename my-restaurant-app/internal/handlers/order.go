@@ -113,6 +113,20 @@ func (h *OrderHandler) GetOrdersByUserID(w http.ResponseWriter, r *http.Request)
 
 }
 
+func (h *OrderHandler) UpdateOrder(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPut {
+		models.ManageResponseMenu(w, "Invalid Request Method", http.StatusMethodNotAllowed, nil)
+		return
+	}
+	role := h.Authorization(w, r)
+
+	if role == "admin" {
+
+	} else {
+		models.ManageResponseOrder(w, "Order update can only be perform by admin ", http.StatusBadRequest, nil)
+	}
+}
+
 func (h *OrderHandler) Authorization(w http.ResponseWriter, r *http.Request) string {
 	authHeader := r.Header.Get("Authorization")
 

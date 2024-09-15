@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"my-restaurant-app/internal/models"
 	"my-restaurant-app/internal/services"
+	"my-restaurant-app/internal/utils"
 	"net/http"
 )
 
@@ -25,7 +26,14 @@ func (h *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 	}
 	var order models.Order
 	if err := json.NewDecoder(r.Body).Decode(&order); err != nil {
-		http.Error(w, "Invalid request payload "+err.Error(), http.StatusBadRequest)
+		models.ManageResponseOrder(w, "Invalid request payload "+err.Error(), http.StatusBadRequest, nil)
+		return
+	}
+
+	//validation
+	err := utils.ValidateOrder(&order)
+	if err != nil {
+		models.ManageResponseOrder(w, err.Error(), http.StatusBadRequest, nil)
 		return
 	}
 

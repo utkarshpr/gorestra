@@ -33,10 +33,10 @@ func (r *ReservationRepository) CreateReservastion(reser *models.ReservationRequ
 		NumberOfPeople:  reser.NumberOfPeople,
 		DateTime:        reser.DateTime,
 	}
-	query = `select id from reservations where user_id=? and date_time=?`
+	query = `select r.id,u.first_name,u.last_name from reservations r join users u on u.user_id=r.user_id where r.user_id=? and date_time=?`
 	rows := r.db.QueryRow(query, reser.UserId, reser.DateTime)
 
-	if err := rows.Scan(&rr.ReservationNo); err != nil {
+	if err := rows.Scan(&rr.ReservationNo, &rr.FirstName, &rr.LastName); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, errors.New("user not found")
 		}

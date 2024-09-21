@@ -44,6 +44,7 @@ func main() {
 	http.HandleFunc("/api/orders", orderHandler.CreateOrder)
 	http.HandleFunc("/api/ordersAll", orderHandler.FetchAllOrder)
 	http.HandleFunc("/api/orderByUser", orderHandler.GetOrdersByUserID)
+	http.HandleFunc("/api/orders/{id}", orderHandler.UpdateOrder)
 	// Start the server
 	log.Println("Server started at http://localhost:8081")
 	log.Fatal(http.ListenAndServe(":8080", nil))

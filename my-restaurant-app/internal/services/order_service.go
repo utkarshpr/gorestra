@@ -35,3 +35,12 @@ func (s *OrderService) GetOrdersByUserID(userID int) ([]*models.OrderResponse, e
 	}
 	return orders, nil
 }
+func (s *OrderService) UpdateOrder(order *models.Order) ([]*models.OrderResponse, error) {
+	orderResponse, err :=
+		s.orderRepo.UpdateOrder(order)
+	if err != nil {
+		return nil, err
+	}
+	return orderResponse, nil
+
+}

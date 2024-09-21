@@ -23,8 +23,8 @@ func NewUserRepository(db *sql.DB) *UserRepository {
 // CreateUser inserts a new user into the database.
 func (r *UserRepository) CreateUser(user *models.User) error {
 
-	query := "INSERT INTO users (username, email, password, role,user_id) VALUES (?, ?, ?, ?,?)"
-	_, err := r.db.Exec(query, user.Username, user.Email, user.Password, user.Role, user.ID)
+	query := "INSERT INTO users (username, email, password, role,user_id,first_name,last_name) VALUES (?, ?, ?, ?,?,?,?)"
+	_, err := r.db.Exec(query, user.Username, user.Email, user.Password, user.Role, user.ID, user.FirstName, user.LastName)
 
 	if err != nil {
 		if isUniqueConstraintViolation(err) {
@@ -51,10 +51,10 @@ func isUniqueConstraintViolation(err error) bool {
 func (r *UserRepository) LoginUser(user *models.LoginRequest) (*models.UserResponse, error) {
 
 	userFetched := &models.User{}
-	query := "SELECT user_id, username, email, password, role FROM users WHERE email = ?"
+	query := "SELECT user_id, username, email, password, role ,first_name,last_name FROM users WHERE email = ?"
 	row := r.db.QueryRow(query, user.Email)
 
-	err := row.Scan(&userFetched.ID, &userFetched.Username, &userFetched.Email, &userFetched.Password, &userFetched.Role)
+	err := row.Scan(&userFetched.ID, &userFetched.Username, &userFetched.Email, &userFetched.Password, &userFetched.Role, &userFetched.FirstName, &userFetched.LastName)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, errors.New("user not found")
@@ -66,20 +66,22 @@ func (r *UserRepository) LoginUser(user *models.LoginRequest) (*models.UserRespo
 		return nil, errors.New("invalid credentials") // Password does not match
 	}
 	userResponse := models.UserResponse{
-		ID:       userFetched.ID,
-		Username: userFetched.Username,
-		Email:    userFetched.Email,
-		Role:     userFetched.Role,
+		ID:        userFetched.ID,
+		Username:  userFetched.Username,
+		Email:     userFetched.Email,
+		Role:      userFetched.Role,
+		FirstName: userFetched.FirstName,
+		LastName:  userFetched.LastName,
 	}
 	return &userResponse, nil
 }
 
 func (r *UserRepository) GetUser(username string) (*models.User, error) {
-	query := "SELECT user_id,username,email,role FROM users WHERE email = ?"
+	query := "SELECT user_id,username,email,role, first_name,last_name FROM users WHERE email = ?"
 	row := r.db.QueryRow(query, username)
 
 	var user models.User
-	if err := row.Scan(&user.ID, &user.Username, &user.Email, &user.Role); err != nil {
+	if err := row.Scan(&user.ID, &user.Username, &user.Email, &user.Role, &user.FirstName, &user.LastName); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, errors.New("user not found")
 		}

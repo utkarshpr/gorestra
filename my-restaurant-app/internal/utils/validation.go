@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"my-restaurant-app/internal/models"
+	"strconv"
+	"time"
 )
 
 func ValidateOrder(order *models.Order) error {
@@ -51,6 +53,36 @@ func ValidateOrder(order *models.Order) error {
 	}
 
 	// If all validations pass, return nil (no error)
+	return nil
+
+}
+
+func ValidateResrvation(r *models.ReservationRequest) error {
+	// Validate UserId
+	if r.UserId == "" {
+		return errors.New("userId cannot be empty")
+	}
+
+	// Validate DateTime - check if it's in the correct format and a future date
+	const layout = "2006-01-02 15:04:05"
+	_, err := time.Parse(layout, r.DateTime)
+	if err != nil {
+		return fmt.Errorf("dateTime must be in the format YYYY-MM-DD HH:MM:SS")
+	}
+
+	// Validate NumberOfPeople - check if it's a valid number and greater than 0
+	numPeople, err := strconv.Atoi(r.NumberOfPeople)
+	if err != nil || numPeople <= 0 {
+		return errors.New("numberOfPeople must be a valid positive integer")
+	}
+
+	// Validate SpecialRequests - optional field, but we can add a length limit
+	if len(r.SpecialRequests) > 200 {
+		return errors.New("specialRequests cannot exceed 200 characters")
+	}
+
+	// Optionally, add more validations (e.g., check if UserId exists in DB)
+
 	return nil
 
 }

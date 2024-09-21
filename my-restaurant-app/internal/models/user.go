@@ -5,17 +5,21 @@ import "github.com/golang-jwt/jwt/v5"
 
 // User represents a user in the system.
 type User struct {
-	ID       int    `json:"userid"`   // Unique identifier for the user
-	Username string `json:"username"` // User's username
-	Email    string `json:"email"`    // User's email address
-	Password string `json:"password"` // User's password (hashed), not included in JSON responses
-	Role     string `json:"role"`     // User's role (e.g., "customer", "admin")
+	ID        int    `json:"userid"`   // Unique identifier for the user
+	Username  string `json:"username"` // User's username
+	Email     string `json:"email"`    // User's email address
+	Password  string `json:"password"` // User's password (hashed), not included in JSON responses
+	Role      string `json:"role"`
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"` // User's role (e.g., "customer", "admin")
 }
 type UserResponse struct {
-	ID       int    `json:"userid"`
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Role     string `json:"role"`
+	ID        int    `json:"userid"`
+	Username  string `json:"username"`
+	Email     string `json:"email"`
+	Role      string `json:"role"`
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
 }
 
 type GenericResponse struct {

@@ -54,10 +54,12 @@ func (h *UserHandler) RegisterUserHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 	userResponse := models.UserResponse{
-		ID:       user.ID,
-		Username: user.Username,
-		Email:    user.Email,
-		Role:     user.Role,
+		ID:        user.ID,
+		Username:  user.Username,
+		Email:     user.Email,
+		Role:      user.Role,
+		FirstName: user.FirstName,
+		LastName:  user.LastName,
 	}
 
 	models.ManageResponse(w, "User registered successfully", http.StatusCreated, &userResponse)
@@ -166,10 +168,12 @@ func (h *UserHandler) GetUserProfileHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 	userResponse := models.UserResponse{
-		ID:       user.ID,
-		Username: user.Username,
-		Email:    user.Email,
-		Role:     user.Role,
+		ID:        user.ID,
+		Username:  user.Username,
+		Email:     user.Email,
+		Role:      user.Role,
+		FirstName: user.FirstName,
+		LastName:  user.LastName,
 	}
 
 	models.ManageResponse(w, "User profile retrieved successfully", http.StatusOK, &userResponse)

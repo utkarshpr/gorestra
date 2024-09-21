@@ -128,7 +128,7 @@ func (h *OrderHandler) UpdateOrder(w http.ResponseWriter, r *http.Request) {
 		}
 		orderResponse, err := h.orderService.UpdateOrder(order)
 		if err != nil {
-			models.ManageResponseOrder(w, "Unable to update the orders"+err.Error(), http.StatusBadRequest, nil)
+			models.ManageResponseOrder(w, "Unable to update the orders "+err.Error(), http.StatusBadRequest, nil)
 			return
 		}
 

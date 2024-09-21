@@ -121,6 +121,18 @@ func (h *OrderHandler) UpdateOrder(w http.ResponseWriter, r *http.Request) {
 	role := h.Authorization(w, r)
 
 	if role == "admin" {
+		var order *models.Order
+		if err := json.NewDecoder(r.Body).Decode(&order); err != nil {
+			models.ManageResponseOrder(w, "Invalid request payload "+err.Error(), http.StatusBadRequest, nil)
+			return
+		}
+		orderResponse, err := h.orderService.UpdateOrder(order)
+		if err != nil {
+			models.ManageResponseOrder(w, "Unable to update the orders"+err.Error(), http.StatusBadRequest, nil)
+			return
+		}
+
+		models.ManageResponseOrders(w, "Update Successfully", http.StatusOK, orderResponse)
 
 	} else {
 		models.ManageResponseOrder(w, "Order update can only be perform by admin ", http.StatusBadRequest, nil)

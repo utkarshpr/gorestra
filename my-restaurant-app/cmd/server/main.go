@@ -45,6 +45,12 @@ func main() {
 	http.HandleFunc("/api/ordersAll", orderHandler.FetchAllOrder)
 	http.HandleFunc("/api/orderByUser", orderHandler.GetOrdersByUserID)
 	http.HandleFunc("/api/orders/{id}", orderHandler.UpdateOrder)
+
+	manageRepo := repository.NewReservationRepository(db)
+	manageService := services.NewReserrvationService(manageRepo)
+	manageHandler := handlers.NewmanageHandler(manageService, jwtSecret, userService)
+	http.HandleFunc("/api/reservations", manageHandler.CreateReservastion)
+
 	// Start the server
 	log.Println("Server started at http://localhost:8081")
 	log.Fatal(http.ListenAndServe(":8080", nil))

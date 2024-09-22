@@ -49,7 +49,9 @@ func main() {
 	manageRepo := repository.NewReservationRepository(db)
 	manageService := services.NewReserrvationService(manageRepo)
 	manageHandler := handlers.NewmanageHandler(manageService, jwtSecret, userService)
+
 	http.HandleFunc("/api/reservations", manageHandler.CreateReservastion)
+	http.HandleFunc("/api/getAllReservations", manageHandler.GetAllReservations)
 
 	// Start the server
 	log.Println("Server started at http://localhost:8081")

@@ -22,3 +22,11 @@ func (s *ReserrvationService) CreateReservastion(reser *models.ReservationReques
 	}
 	return reservationResponse, nil
 }
+
+func (s *ReserrvationService) GetAllReservations() ([]*models.ReservationResponse, error) {
+	rr, err := s.reservationRepo.GetAllReservations()
+	if err != nil {
+		return nil, err
+	}
+	return rr, nil
+}

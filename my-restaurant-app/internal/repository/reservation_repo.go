@@ -16,7 +16,18 @@ func NewReservationRepository(db *sql.DB) *ReservationRepository {
 
 func (r *ReservationRepository) CreateReservastion(reser *models.ReservationRequest) (*models.ReservationResponse, error) {
 
-	query := `insert into reservations (user_id,date_time,number_of_people,special_requests) values(?,?,?,?)`
+	query := `select count(*) from reservations where user_id=? and date_time= ?`
+	var count int
+	err1 := r.db.QueryRow(query, reser.UserId, reser.DateTime).Scan(&count)
+	if err1 != nil {
+		return nil, err1
+	}
+	if count > 0 {
+		err := errors.New("user and date already exist in reservation chart")
+		return nil, err
+	}
+
+	query = `insert into reservations (user_id,date_time,number_of_people,special_requests) values(?,?,?,?)`
 	_, err := r.db.Exec(query, reser.UserId, reser.DateTime, reser.NumberOfPeople, reser.SpecialRequests)
 
 	if err != nil {
@@ -45,4 +56,41 @@ func (r *ReservationRepository) CreateReservastion(reser *models.ReservationRequ
 
 	return rr, nil
 
+}
+
+func (r *ReservationRepository) GetAllReservations() ([]*models.ReservationResponse, error) {
+	query := `select id,u.user_id,date_time,number_of_people ,special_requests,first_name,last_name 
+				from reservations r join users u on u.user_id=r.user_id`
+
+	rows, err := r.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var rr []*models.ReservationResponse
+
+	for rows.Next() {
+		var ReservationNo, UserId, DateTime, NumberOfPeople, SpecialRequests, FirstName, LastName string
+		err := rows.Scan(&ReservationNo, &UserId, &DateTime, &NumberOfPeople, &SpecialRequests, &FirstName, &LastName)
+		if err != nil {
+			return nil, err
+		}
+
+		//insert into map via user_id
+
+		rowData := &models.ReservationResponse{
+			ReservationNo:   ReservationNo,
+			UserId:          UserId,
+			DateTime:        DateTime,
+			NumberOfPeople:  NumberOfPeople,
+			SpecialRequests: SpecialRequests,
+			FirstName:       FirstName,
+			LastName:        LastName,
+		}
+		rr = append(rr, rowData)
+
+	}
+
+	return rr, nil
 }

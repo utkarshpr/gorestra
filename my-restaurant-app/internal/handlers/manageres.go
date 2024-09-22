@@ -79,7 +79,7 @@ func (h *ManageReservationHandler) UpdateRemoveGetReservationByID(w http.Respons
 	} else if r.Method == http.MethodPut {
 		h.UpdateReservationByID(w, r)
 	} else if r.Method == http.MethodDelete {
-
+		h.DeletedReservationByID(w, r)
 	} else {
 		models.ManageResponseReserv(w, "Method not allowed ", http.StatusMethodNotAllowed, nil)
 	}
@@ -136,6 +136,31 @@ func (h *ManageReservationHandler) UpdateReservationByID(w http.ResponseWriter, 
 
 }
 
+func (h *ManageReservationHandler) DeletedReservationByID(w http.ResponseWriter, r *http.Request) {
+	userID := r.URL.Query().Get("userID")
+	DateTime := r.URL.Query().Get("DateTime")
+	if len(userID) == 0 || len(DateTime) == 0 {
+		models.ManageResponseReserv(w, "Error: userID or Date and time is null", http.StatusBadRequest, nil)
+		return
+	}
+	role := h.Authorization(w, r)
+	if role == "admin" {
+		err := h.manageReserService.DeletedReservationByID(userID, DateTime)
+
+		if err != nil {
+			models.ManageResponseReserv(w, "Error: "+err.Error(), http.StatusBadRequest, nil)
+			return
+		}
+		if DateTime == "0" {
+			models.ManageResponseReserv(w, "All Reservation from ID "+userID+" deleted successfully ", http.StatusOK, nil)
+		} else {
+			models.ManageResponseReserv(w, "Reservation from ID "+userID+" for date "+DateTime+" deleted successfully ", http.StatusOK, nil)
+		}
+	} else {
+		models.ManageResponseReserv(w, "Only Admin can delete the reservation", http.StatusBadRequest, nil)
+	}
+
+}
 func (h *ManageReservationHandler) Authorization(w http.ResponseWriter, r *http.Request) string {
 	authHeader := r.Header.Get("Authorization")
 

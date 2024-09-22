@@ -46,3 +46,11 @@ func (s *ReserrvationService) UpdateReservationByID(userID string, reservation *
 	}
 	return rr, nil
 }
+
+func (s *ReserrvationService) DeletedReservationByID(userID string, DateTime string) error {
+	err := s.reservationRepo.DeletedReservationByID(userID, DateTime)
+	if err != nil {
+		return err
+	}
+	return nil
+}

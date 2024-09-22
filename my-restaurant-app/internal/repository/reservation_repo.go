@@ -186,3 +186,32 @@ func (r *ReservationRepository) UpdateReservationByID(userID string, reservation
 
 	return rr, nil
 }
+
+func (r *ReservationRepository) DeletedReservationByID(userID string, dateTime string) error {
+
+	var query string
+	var err error
+	var result sql.Result
+	if dateTime != "0" {
+		query = `delete from reservations where user_id=? and date_time=?`
+		result, err = r.db.Exec(query, userID, dateTime)
+	} else {
+		query = `delete from reservations where user_id=? `
+		result, err = r.db.Exec(query, userID)
+	}
+	if err != nil {
+		return err
+	}
+
+	// Check if any rows were affected
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return errors.New("no reservation found for user_id at date_time")
+	}
+
+	return nil
+}

@@ -86,3 +86,30 @@ func ValidateResrvation(r *models.ReservationRequest) error {
 	return nil
 
 }
+
+func ValidateResrvationUpdate(r *models.UpdateReservationRequest) error {
+	// Validate UserId
+
+	// Validate DateTime - check if it's in the correct format and a future date
+	const layout = "2006-01-02 15:04:05"
+	_, err := time.Parse(layout, r.DateTime)
+	if err != nil {
+		return fmt.Errorf("dateTime must be in the format YYYY-MM-DD HH:MM:SS")
+	}
+
+	// Validate NumberOfPeople - check if it's a valid number and greater than 0
+	numPeople, err := strconv.Atoi(r.NumberOfPeople)
+	if err != nil || numPeople <= 0 {
+		return errors.New("numberOfPeople must be a valid positive integer")
+	}
+
+	// Validate SpecialRequests - optional field, but we can add a length limit
+	if len(r.SpecialRequests) > 200 {
+		return errors.New("specialRequests cannot exceed 200 characters")
+	}
+
+	// Optionally, add more validations (e.g., check if UserId exists in DB)
+
+	return nil
+
+}

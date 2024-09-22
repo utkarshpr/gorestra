@@ -52,6 +52,7 @@ func main() {
 
 	http.HandleFunc("/api/reservations", manageHandler.CreateReservastion)
 	http.HandleFunc("/api/getAllReservations", manageHandler.GetAllReservations)
+	http.HandleFunc("/api/reservationsByID", manageHandler.UpdateRemoveGetReservationByID)
 
 	// Start the server
 	log.Println("Server started at http://localhost:8081")

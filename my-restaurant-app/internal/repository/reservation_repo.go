@@ -94,3 +94,95 @@ func (r *ReservationRepository) GetAllReservations() ([]*models.ReservationRespo
 
 	return rr, nil
 }
+
+func (r *ReservationRepository) GetAllReservationsById(userID string) (*models.ReservationResponse, error) {
+	query := `select id,u.user_id,date_time,number_of_people ,special_requests,first_name,last_name 
+	from reservations r join users u on u.user_id=r.user_id and u.user_id =?`
+
+	rows, err := r.db.Query(query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	// if !rows.Next() {
+	// 	err := errors.New("no reservation with this id is present")
+	// 	return nil, err
+	// }
+
+	var rr *models.ReservationResponse
+
+	for rows.Next() {
+		var ReservationNo, UserId, DateTime, NumberOfPeople, SpecialRequests, FirstName, LastName string
+		err := rows.Scan(&ReservationNo, &UserId, &DateTime, &NumberOfPeople, &SpecialRequests, &FirstName, &LastName)
+		if err != nil {
+			return nil, err
+		}
+
+		//insert into map via user_id
+
+		rr = &models.ReservationResponse{
+			ReservationNo:   ReservationNo,
+			UserId:          UserId,
+			DateTime:        DateTime,
+			NumberOfPeople:  NumberOfPeople,
+			SpecialRequests: SpecialRequests,
+			FirstName:       FirstName,
+			LastName:        LastName,
+		}
+
+	}
+	if rr == nil {
+		err := errors.New("no reservation with this id is present")
+		return nil, err
+	}
+
+	return rr, nil
+}
+
+func (r *ReservationRepository) UpdateReservationByID(userID string, reservation *models.UpdateReservationRequest) (*models.ReservationResponse, error) {
+	query := `update reservations set date_time=?, special_requests=?, number_of_people=? where user_id=?`
+
+	_, err := r.db.Query(query, reservation.DateTime, reservation.SpecialRequests, reservation.NumberOfPeople, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	query = `select id,u.user_id,date_time,number_of_people ,special_requests,first_name,last_name 
+	from reservations r join users u on u.user_id=r.user_id and u.user_id =?`
+
+	rows, err := r.db.Query(query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var rr *models.ReservationResponse
+
+	for rows.Next() {
+		var ReservationNo, UserId, DateTime, NumberOfPeople, SpecialRequests, FirstName, LastName string
+		err := rows.Scan(&ReservationNo, &UserId, &DateTime, &NumberOfPeople, &SpecialRequests, &FirstName, &LastName)
+		if err != nil {
+			return nil, err
+		}
+
+		//insert into map via user_id
+
+		rr = &models.ReservationResponse{
+			ReservationNo:   ReservationNo,
+			UserId:          UserId,
+			DateTime:        DateTime,
+			NumberOfPeople:  NumberOfPeople,
+			SpecialRequests: SpecialRequests,
+			FirstName:       FirstName,
+			LastName:        LastName,
+		}
+
+	}
+	if rr == nil {
+		err := errors.New("no reservation with this id is present")
+		return nil, err
+	}
+
+	return rr, nil
+}

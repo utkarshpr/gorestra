@@ -16,3 +16,9 @@ type ReservationRequest struct {
 	NumberOfPeople  string `json:"numberOfPeople"`
 	SpecialRequests string `json:"specialRequests"`
 }
+
+type UpdateReservationRequest struct {
+	DateTime        string `json:"dateTime"`
+	NumberOfPeople  string `json:"numberOfPeople"`
+	SpecialRequests string `json:"specialRequests"`
+}

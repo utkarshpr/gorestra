@@ -72,6 +72,70 @@ func (h *ManageReservationHandler) GetAllReservations(w http.ResponseWriter, r *
 	}
 }
 
+func (h *ManageReservationHandler) UpdateRemoveGetReservationByID(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method == http.MethodGet {
+		h.GetReservationById(w, r)
+	} else if r.Method == http.MethodPut {
+		h.UpdateReservationByID(w, r)
+	} else if r.Method == http.MethodDelete {
+
+	} else {
+		models.ManageResponseReserv(w, "Method not allowed ", http.StatusMethodNotAllowed, nil)
+	}
+
+}
+
+func (h *ManageReservationHandler) GetReservationById(w http.ResponseWriter, r *http.Request) {
+
+	userID := r.URL.Query().Get("userID")
+	if len(userID) == 0 {
+		models.ManageResponseReserv(w, "Error: userID is null", http.StatusBadRequest, nil)
+		return
+	}
+	rr, err := h.manageReserService.GetAllReservationsById(userID)
+
+	if err != nil {
+		models.ManageResponseReserv(w, "Error: "+err.Error(), http.StatusBadRequest, nil)
+		return
+	}
+	models.ManageResponseReserv(w, "Reservation from ID fetched successfully ", http.StatusOK, rr)
+}
+
+func (h *ManageReservationHandler) UpdateReservationByID(w http.ResponseWriter, r *http.Request) {
+	userID := r.URL.Query().Get("userID")
+	role := h.Authorization(w, r)
+	if role == "admin" {
+
+		if len(userID) == 0 {
+			models.ManageResponseReserv(w, "Error: userID is null", http.StatusBadRequest, nil)
+			return
+		}
+
+		var reservation *models.UpdateReservationRequest
+		if err := json.NewDecoder(r.Body).Decode(&reservation); err != nil {
+			models.ManageResponseReserv(w, err.Error(), http.StatusBadRequest, nil)
+			return
+		}
+
+		err := utils.ValidateResrvationUpdate(reservation)
+		if err != nil {
+			models.ManageResponseReserv(w, err.Error(), http.StatusUnprocessableEntity, nil)
+			return
+		}
+		rr, err := h.manageReserService.UpdateReservationByID(userID, reservation)
+
+		if err != nil {
+			models.ManageResponseReserv(w, "Error: "+err.Error(), http.StatusBadRequest, nil)
+			return
+		}
+		models.ManageResponseReserv(w, "Reservation from ID Updated successfully ", http.StatusOK, rr)
+	} else {
+		models.ManageResponseReserv(w, "Only Admin can update the reservation", http.StatusBadRequest, nil)
+	}
+
+}
+
 func (h *ManageReservationHandler) Authorization(w http.ResponseWriter, r *http.Request) string {
 	authHeader := r.Header.Get("Authorization")
 

@@ -30,3 +30,19 @@ func (s *ReserrvationService) GetAllReservations() ([]*models.ReservationRespons
 	}
 	return rr, nil
 }
+
+func (s *ReserrvationService) GetAllReservationsById(userID string) (*models.ReservationResponse, error) {
+	rr, err := s.reservationRepo.GetAllReservationsById(userID)
+	if err != nil {
+		return nil, err
+	}
+	return rr, nil
+}
+
+func (s *ReserrvationService) UpdateReservationByID(userID string, reservation *models.UpdateReservationRequest) (*models.ReservationResponse, error) {
+	rr, err := s.reservationRepo.UpdateReservationByID(userID, reservation)
+	if err != nil {
+		return nil, err
+	}
+	return rr, nil
+}

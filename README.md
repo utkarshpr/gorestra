@@ -1,58 +1,129 @@
-collection represents API endpoints for a restaurant management system. The operations include user registration, login, profile management, menu creation, reservations, and order management. Here’s a breakdown of the key endpoints:
+1. User Management Endpoints
+   
+1.1. Register a New User
+Endpoint: POST /api/users/register
+Description: Registers a new user.
+Request Body:
+userid (Integer)
+username (String)
+email (String)
+role (String)
+password (String)
+firstName (String)
+lastName (String)
 
-User Registration (POST /api/users/register):
+1.2. User Login
+Endpoint: POST /api/users/login
+Description: Allows a user to log in using their email and password.
+Request Body:
+email (String)
+password (String)
 
-Registers a new user with fields like userid, username, email, role, password, firstName, and lastName.
-User Login (POST /api/users/login):
+1.3. Get User Profile
+Endpoint: GET /api/users/profile
+Description: Retrieves user profile details using a Bearer token for authentication.
 
-Allows a user to log in using email and password.
-Get Profile (GET /api/users/profile):
+1.4. Update User Profile
+Endpoint: PUT /api/users/profile
+Description: Updates user profile details (e.g., username, email, password).
+Request Body:
+username (String)
+email (String)
+password (String)
 
-Retrieves user profile details, using a Bearer token for authentication.
-Update Profile (PUT /api/users/profile):
+2. Menu Management Endpoints
+   
+2.1. Create a New Menu Item
+Endpoint: POST /api/menu
+Description: Creates a new menu item.
+Request Body:
+menuid (String)
+name (String)
+description (String)
+price (Integer)
+category (String)
+Optionally upload an image file.
 
-Updates user profile details like username, email, and password.
-Create Menu (POST /api/menu):
+2.2. Update an Existing Menu Item
+Endpoint: PUT /api/menu/updateMenu
+Description: Updates an existing menu item by menuid.
+Request Body:
+menuid (String)
+name (String)
+description (String)
+price (Integer)
+Optionally upload an image file.
 
-Creates a new menu item with fields such as menuid, name, description, price, and category. An image file can also be uploaded.
-Create Reservation (POST /api/reservations):
+2.3. Delete a Menu Item
+Endpoint: DELETE /api/menu/deleteMenu
+Description: Deletes a menu item by its ID.
+Query Parameter: id (String)
 
-Creates a reservation for a user with fields like userId, dateTime, numberOfPeople, and specialRequests.
-Create Orders (POST /api/orders):
+2.4. Fetch All Menu Items
+Endpoint: GET /api/menu/fetchAllMenu
+Description: Retrieves all menu items.
 
-Creates a new order for a user by providing the userId, an array of items (menuItemId and quantity), and totalPrice.
-Update Orders (PUT /api/orders/1):
+2.5. Fetch a Menu Item by ID
+Endpoint: GET /api/menu/fetchMenu
+Description: Retrieves a specific menu item by menuid.
+Query Parameter: id (String)
 
-Updates an existing order with modified items and status.
-Update Menu (PUT /api/menu/updateMenu):
+3. Reservation Management Endpoints
 
-Updates an existing menu item by menuid with fields like name, description, price, and an image file.
-Delete Menu (DELETE /api/menu/deleteMenu?id=chickenCurry2):
+3.1. Create a New Reservation
+Endpoint: POST /api/reservations
+Description: Creates a reservation for a user.
+Request Body:
+userId (Integer)
+dateTime (String, ISO format)
+numberOfPeople (Integer)
+specialRequests (String, optional)
 
-Deletes a menu item by its id.
-Fetch All Menus (GET /api/menu/fetchAllMenu):
+3.2. Fetch All Reservations
+Endpoint: GET /api/getAllReservations
+Description: Retrieves all reservations.
 
-Retrieves all menu items.
-Fetch All Orders (GET /api/ordersAll):
+3.3. Fetch Reservations by User ID
+Endpoint: GET /api/reservationsByID
+Description: Retrieves reservations for a specific user.
+Query Parameter: userID (Integer)
 
-Retrieves all orders.
-Fetch All Reservations (GET /api/getAllReservations):
+3.4. Update Reservation by User ID
+Endpoint: PUT /api/reservationsByID
+Description: Updates a reservation for a specific user.
+Query Parameter: userID (Integer)
+Request Body:
+dateTime (String, ISO format)
+numberOfPeople (Integer)
+specialRequests (String, optional)
 
-Retrieves all reservations.
-Get Menu by ID (GET /api/menu/fetchMenu?id=chickenCurry):
+4. Order Management Endpoints
 
-Retrieves a menu item by its id.
-Get Reservations by ID (GET /api/reservationsByID?userID=11):
+4.1. Create a New Order
+Endpoint: POST /api/orders
+Description: Creates a new order for a user.
+Request Body:
+userId (Integer)
+items: Array of objects containing:
+menuItemId (String)
+quantity (Integer)
+totalPrice (Integer)
+status (String, e.g., Pending)
 
-Retrieves reservations for a specific user by userID.
-Update Reservations by ID (PUT /api/reservationsByID?userID=11):
+4.2. Update an Order
+Endpoint: PUT /api/orders/{orderid}
+Description: Updates an existing order with modified items and status.
+Request Body:
+items: Array of objects containing:
+menuItemId (String)
+quantity (Integer)
+status (String, e.g., Completed)
 
-Updates a reservation for a specific user by userID.
-Get Orders by User ID (GET /api/orderByUser?userID=2):
+4.3. Fetch All Orders
+Endpoint: GET /api/ordersAll
+Description: Retrieves all orders.
 
-Retrieves orders for a specific user by userID.
-Each endpoint uses either Bearer token authentication or requires certain query parameters to function. The raw body for POST/PUT requests is typically in JSON format.
-
-
-
-
+4.4. Fetch Orders by User ID
+Endpoint: GET /api/orderByUser
+Description: Retrieves orders for a specific user by their userID.
+Query Parameter: userID (Integer)

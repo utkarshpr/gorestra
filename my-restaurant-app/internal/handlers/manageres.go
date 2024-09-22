@@ -6,6 +6,9 @@ import (
 	"my-restaurant-app/internal/services"
 	"my-restaurant-app/internal/utils"
 	"net/http"
+	"strings"
+
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type ManageReservationHandler struct {
@@ -49,4 +52,78 @@ func (h *ManageReservationHandler) CreateReservastion(w http.ResponseWriter, r *
 	}
 	models.ManageResponseReserv(w, "Reservation created successfully :) ", http.StatusOK, reservationResponse)
 
+}
+
+func (h *ManageReservationHandler) GetAllReservations(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		models.ManageResponseReserv(w, "Method not allowed ", http.StatusMethodNotAllowed, nil)
+		return
+	}
+	role := h.Authorization(w, r)
+	if role == "admin" {
+		rr, err := h.manageReserService.GetAllReservations()
+		if err != nil {
+			models.ManageResponseReserv(w, err.Error(), http.StatusBadRequest, nil)
+			return
+		}
+		models.ManageResponseReservAll(w, "Reservation created successfully :) ", http.StatusOK, rr)
+	} else {
+		models.ManageResponseReserv(w, "Only Admin can get all reservation", http.StatusBadRequest, nil)
+	}
+}
+
+func (h *ManageReservationHandler) Authorization(w http.ResponseWriter, r *http.Request) string {
+	authHeader := r.Header.Get("Authorization")
+
+	if authHeader == "" {
+		models.ManageResponseMenu(w, "Authorization header missing", http.StatusUnauthorized, nil)
+		return ""
+	}
+
+	// Extract token from header
+	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+	if tokenString == "" {
+		models.ManageResponseMenu(w, "Bearer token missing", http.StatusUnauthorized, nil)
+		return ""
+	}
+
+	// Parse and validate the token
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, http.ErrNoLocation
+		}
+		return h.jwtSecret, nil
+	})
+	if err != nil || !token.Valid {
+		models.ManageResponseMenu(w, "Invalid token", http.StatusUnauthorized, nil)
+		return ""
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		models.ManageResponseMenu(w, "Invalid token claims", http.StatusUnauthorized, nil)
+		return ""
+	}
+
+	username, ok := claims["sub"].(string)
+
+	if !ok {
+		models.ManageResponseMenu(w, "Username not found in token ", http.StatusUnauthorized, nil)
+		return ""
+	}
+
+	// Get user profile
+	_, err = h.useService.GetUserProfile(username)
+	if err != nil {
+		models.ManageResponseMenu(w, "profile no exist please register"+err.Error(), http.StatusNotFound, nil)
+		return ""
+	}
+	role, ok := claims["role"].(string)
+
+	if !ok {
+		models.ManageResponseMenu(w, "Username not found in token ", http.StatusUnauthorized, nil)
+		return ""
+	}
+
+	return role
 }
